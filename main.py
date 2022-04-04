@@ -13,6 +13,7 @@ load_dotenv()
 
 API_KEY = os.environ['API_KEY']
 RECIVER = json.loads(os.environ['RECIVER'])
+COUNT_DOWN_NOTIFY = int(os.environ['COUNT_DOWN_NOTIFY'])
 
 process = None
 participants = 0
@@ -33,7 +34,7 @@ async def ping():
             if process:
                 process.terminate()
                 sendmsg(
-                    f"🔊Someone click the button\nTotal participants: {participants}"
+                    f"🔊Someone click the button\nTotal participants: {participants} [ Check!](https://www.binance.com/en/activity/bitcoin-button-game)"
                 )
                 COUNT_DOWN = 60
             process = multiprocessing.Process(target=count_down, args=(COUNT_DOWN,))
@@ -48,9 +49,9 @@ def count_down(COUNT_DOWN):
         COUNT_DOWN -= 1
         print("Total participants: ", participants)
         print(COUNT_DOWN)
-        if COUNT_DOWN < 30:
+        if COUNT_DOWN < COUNT_DOWN_NOTIFY:
             msg = threading.Thread(
-                target=sendmsg, args=(f"📣📣📣Countdown: {COUNT_DOWN}",)
+                target=sendmsg, args=(f"[📣📣📣Countdown:  {COUNT_DOWN}](https://www.binance.com/en/activity/bitcoin-button-game)",)
             )
             msg.start()
         time.sleep(1 - (time.time() - s))
@@ -58,6 +59,6 @@ def count_down(COUNT_DOWN):
 
 def sendmsg(msg):
     for r in RECIVER:
-        bot.send_message(r, msg)
+        bot.send_message(r, msg, parse_mode='Markdown', disable_web_page_preview=True)
 
 asyncio.get_event_loop().run_until_complete(ping())
