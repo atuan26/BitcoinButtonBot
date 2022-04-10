@@ -1,3 +1,4 @@
 websockets
 pyTelegramBotAPI
 python-dotenv
+aiohttp

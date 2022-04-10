@@ -5,6 +5,7 @@ import os
 import threading
 import time
 
+from telebot.async_telebot import AsyncTeleBot
 import telebot
 import websockets
 from dotenv import load_dotenv
@@ -20,8 +21,11 @@ participants = 0
 COUNT_DOWN = 60
 
 bot = telebot.TeleBot(API_KEY)
+abot = AsyncTeleBot(API_KEY)
 
 async def ping():
+    await asyncio.sleep(3)
+    print('ping')
     global process, participants, COUNT_DOWN, RECIVER
     while True:
         async with websockets.connect(
@@ -45,7 +49,7 @@ def count_down(COUNT_DOWN):
     global bot
     while COUNT_DOWN != 0:
         s = time.time()
-        os.system("cls" if os.name == "nt" else "clear")
+        # os.system("cls" if os.name == "nt" else "clear")
         COUNT_DOWN -= 1
         print("Total participants: ", participants)
         print(COUNT_DOWN)
@@ -61,4 +65,16 @@ def sendmsg(msg):
     for r in RECIVER:
         bot.send_message(r, msg, parse_mode='Markdown', disable_web_page_preview=True)
 
-asyncio.get_event_loop().run_until_complete(ping())
+
+@abot.message_handler(commands=['greet'])
+async def send_welcome(message):
+    await abot.reply_to(message, "Howdy, how are you doing?")
+
+loop = asyncio.get_event_loop() 
+loop.create_task(ping())
+loop.run_until_complete(abot.polling())
+
+try:
+    loop.run_forever()
+except KeyboardInterrupt:
+    pass
